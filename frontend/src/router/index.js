@@ -3,6 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior(to, from, savedPosition) {
+    return savedPosition || { top: 0 }
+  },
   routes: [
     { path: '/', redirect: '/manager/home' },
     {
@@ -22,7 +25,8 @@ const router = createRouter({
           component: () => import('@/views/ScheduleManage.vue')
         },
         { path: 'study-plan', name: 'StudyPlan', component: () => import('@/views/studyPlan.vue') },
-        { path: 'chat', name: 'Chat', component: () => import('@/views/Chat.vue') }
+        { path: 'chat', name: 'Chat', component: () => import('@/views/Chat.vue') },
+        { path: 'documents', name: 'Documents', component: () => import('@/views/Documents.vue') }
       ]
     },
     { path: '/login', name: 'Login', component: () => import('@/views/Login.vue') },

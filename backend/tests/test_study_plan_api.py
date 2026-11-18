@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime
 
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
@@ -34,7 +35,10 @@ class StudyPlanAPITests(unittest.TestCase):
             db.add_all([
                 User(id=1, username="alice", password="unused", name="Alice", role="student", status=1),
                 User(id=2, username="bob", password="unused", name="Bob", role="student", status=1),
-                StudyPlan(id=1, user_id=1, content="Review Python"),
+                StudyPlan(
+                    id=1, user_id=1, content="Review Python",
+                    create_time=datetime(2026, 11, 18, 11, 22, 18),
+                ),
                 StudyPlan(id=2, user_id=2, content="Bob study plan"),
             ])
             db.commit()
@@ -84,6 +88,10 @@ class StudyPlanAPITests(unittest.TestCase):
                 self.assertEqual(result["code"], 200)
                 self.assertEqual(result["data"]["total"], 1)
                 self.assertEqual(result["data"]["list"][0]["content"], "Review Python")
+                self.assertEqual(
+                    result["data"]["list"][0]["create_time"], "2026-11-18T11:22:18"
+                )
+                self.assertNotIn("created_time", result["data"]["list"][0])
 
     def test_create_and_delete_return_success_without_redirects(self):
         created = self.client.post(
@@ -97,6 +105,14 @@ class StudyPlanAPITests(unittest.TestCase):
         self.assertEqual(created.headers.get("access-control-allow-origin"), self.headers["Origin"])
         plan_id = created.json()["data"]["id"]
         self.assertEqual(created.json()["data"]["content"], "Practice SQL")
+        with self.sessions() as db:
+            self.assertEqual(
+                created.json()["data"]["create_time"],
+                db.get(StudyPlan, plan_id).create_time.isoformat(),
+            )
+        listed = self.client.get("/api/study-plans", headers=self.headers).json()
+        saved_plan = next(plan for plan in listed["data"]["list"] if plan["id"] == plan_id)
+        self.assertEqual(saved_plan["create_time"], created.json()["data"]["create_time"])
 
         deleted = self.client.delete(
             f"/api/study-plans/{plan_id}", headers=self.headers, follow_redirects=False

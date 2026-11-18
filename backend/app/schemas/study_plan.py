@@ -16,5 +16,5 @@ class StudyPlanResponse(BaseModel):
 
     id: int
     content: str
-    created_time: datetime | None = None
+    create_time: datetime
     model_config = ConfigDict(from_attributes=True)

@@ -2,7 +2,7 @@
   <div>
     <el-card>
       <template #header>
-        <div style="font-size: 16px; font-weight: bold">Course assistant</div>
+        <div style="font-size: 16px; font-weight: bold">Conversation</div>
       </template>
 
       <div
@@ -10,10 +10,10 @@
         class="messages"
         aria-live="polite"
         style="
-          height: 480px;
+          height: clamp(280px, calc(100dvh - 340px), 620px);
           overflow-y: auto;
           padding: 8px 4px;
-          background-color: #fafafa;
+          background-color: #f7f9fc;
           border-radius: 6px;
         "
       >
@@ -28,10 +28,10 @@
         >
           <div
             :style="{
-              maxWidth: '70%',
+              maxWidth: 'min(85%, 760px)',
               padding: '10px 12px',
-              borderRadius: '8px',
-              backgroundColor: item.role === 'user' ? '#409eff' : '#fff',
+              borderRadius: '6px',
+              backgroundColor: item.role === 'user' ? 'var(--el-color-primary)' : '#fff',
               color: item.role === 'user' ? '#fff' : '#333',
               lineHeight: '1.6',
               boxShadow: '0 1px 2px rgba(0, 0, 0, 0.06)'

@@ -1,24 +1,18 @@
 <template>
-  <div style="width: 40%">
+  <div class="account-page">
     <el-card>
       <template #header>
         <div style="font-size: 16px; font-weight: bold">
           <span>Change password</span>
         </div>
       </template>
-      <el-form
-        ref="formRef"
-        :rules="rules"
-        :model="form"
-        label-width="80px"
-        style="width: 100%; padding-right: 50px"
-      >
+      <el-form ref="formRef" :rules="rules" :model="form" label-position="top" style="width: 100%">
         <el-form-item label="Current password" prop="oldPassword">
           <el-input
             type="password"
             show-password
             v-model="form.oldPassword"
-            placeholer="Please enter your current password"
+            placeholder="Please enter your current password"
           />
         </el-form-item>
         <el-form-item label="New password" prop="newPassword">
@@ -26,7 +20,7 @@
             type="password"
             show-password
             v-model="form.newPassword"
-            placeholer="Please enter a new password"
+            placeholder="Please enter a new password"
           />
         </el-form-item>
         <el-form-item label="Confirm password" prop="confirmPassword">
@@ -34,11 +28,13 @@
             type="password"
             show-password
             v-model="form.confirmPassword"
-            placeholer="Please confirm the new password"
+            placeholder="Please confirm the new password"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="submitting" @click="handleSubmit">Save changes</el-button>
+          <el-button type="primary" :loading="submitting" @click="handleSubmit"
+            >Save changes</el-button
+          >
         </el-form-item>
       </el-form>
     </el-card>
@@ -75,7 +71,9 @@ const validatePass = (rule, value, callback) => {
 const rules = {
   oldPassword: [{ required: true, message: 'Please enter your current password', trigger: 'blur' }],
   newPassword: [{ required: true, message: 'Please enter a new password', trigger: 'blur' }],
-  confirmPassword: [{ validator: validatePass, message: 'Please confirm the new password', trigger: 'blur' }]
+  confirmPassword: [
+    { validator: validatePass, message: 'Please confirm the new password', trigger: 'blur' }
+  ]
 }
 
 const handleSubmit = async () => {

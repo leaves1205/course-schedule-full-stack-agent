@@ -13,9 +13,13 @@ The assistant queries the signed-in user's schedule through a JWT-bound MCP tool
 - **Streaming chat:** display answer fragments, processing status, and tool activity; internal review output is excluded from the stream.
 - **Short-term conversation memory:** restore chat history and drafts after page reloads or navigation within the same tab. Clear them on sign-out, session invalidation, or a new sign-in.
 - **User isolation:** MCP resolves identity from the request JWT rather than a model-supplied user ID.
-- **Local tests:** backend tests use isolated SQLite databases and mocked model responses; frontend tests cover chat restoration, logout cleanup, and interrupted streams.
+- **Course documents:** administrators upload `.txt`, `.md`, `.pdf`, and `.docx` materials, preview their extracted text, and manage saved documents. Uploads support multiple files with a 100 MiB limit per file; a failed upload rolls back the batch.
+- **Blue and white interface:** responsive navigation, course and schedule tables, account forms, and a dashboard showing real schedule totals and recent study plans.
+- **Local tests:** backend tests use isolated SQLite databases and mocked model responses; frontend tests cover chat restoration, logout cleanup, interrupted streams, role-based navigation, dashboard data, and failed requests.
 
-The interface and source comments are in English. The answering model's current system prompt requests Chinese responses; fixed guardrail messages are in English. This is configurable in `backend/app/services/agent_service.py` and `backend/app/hooks/course_guardrails.py`.
+The course assistant responds in English, including table headers and follow-up questions, while preserving course names and locations from the query results. The backend supplies today's weekday and the current week's date range. Language rules are configured in `backend/app/services/agent_service.py`; fixed guardrail messages are configured in `backend/app/hooks/course_guardrails.py`.
+
+Document text extraction powers administrator previews. The assistant's data source is the authenticated schedule tool. Uploaded materials are stored locally in `backend/data/kb/`; the whole `backend/data/` directory is excluded from Git.
 
 ## Architecture
 
@@ -192,6 +196,7 @@ Conversation memory is stored in the current tab's `sessionStorage`, scoped to t
 | `/api/schedules` | Schedule management and personal schedule queries |
 | `/api/study-plans` | Personal study plans |
 | `/api/files` | File uploads |
+| `/api/documents` | Administrator document uploads, listing, deletion, and text previews |
 | `POST /api/chat/ask` | Complete assistant response |
 | `POST /api/chat/stream` | SSE chat response |
 | `GET /api/mcp/my-schedules` | Authenticated MCP query debugging |
@@ -230,6 +235,7 @@ npm run build
 │   │   ├── schemas/         # Request and response schemas
 │   │   └── services/        # Business logic, agent, and MCP client
 │   ├── tests/
+│   ├── data/kb/             # Runtime course documents, excluded from Git
 │   ├── uploads/             # Runtime files, excluded from Git
 │   ├── .env.example
 │   ├── mcp_server.py

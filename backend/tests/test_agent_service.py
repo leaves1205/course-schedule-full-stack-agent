@@ -103,6 +103,36 @@ class AgentServiceTests(unittest.IsolatedAsyncioTestCase):
 
         self.tools = [get_my_schedules]
 
+    def test_prompt_supplies_english_language_and_correct_calendar_context(self):
+        prompt = agent_service._build_system_prompt(date(2026, 11, 18))
+        self.assertIn("Respond in English", prompt)
+        self.assertIn("Today is 2026-11-18 (Wednesday)", prompt)
+        self.assertIn("2026-11-16 (Monday)", prompt)
+        self.assertIn("2026-11-22 (Sunday)", prompt)
+        self.assertIn("Preserve course names and locations exactly", prompt)
+
+    async def test_both_paths_request_english_despite_previous_chinese_replies(self):
+        history = [
+            ChatMessage(role="user", content="Show my schedule"),
+            ChatMessage(role="assistant", content="\u4eca\u5929\u6ca1\u6709\u8bfe\u7a0b\u3002"),
+        ]
+        for streaming in (False, True):
+            with self.subTest(streaming=streaming):
+                model = ScriptedChatModel(
+                    responses=[AIMessage(content="No classes are scheduled today.")],
+                    review_model=reviewer(),
+                )
+                with patch.object(agent_service, "_build_model", return_value=model), patch.object(
+                    agent_service, "_load_mcp_tools", AsyncMock(return_value=self.tools)
+                ):
+                    if streaming:
+                        result = (await collect_stream("Show my schedule", history))[-1]
+                    else:
+                        result = await agent_service.ask("Show my schedule", history, "Bearer alice")
+                self.assertIn("Respond in English", model.calls[0][0].content)
+                self.assertIn("earlier replies used another language", model.calls[0][0].content)
+                self.assertEqual(result["answer"], "No classes are scheduled today.")
+
     async def test_allow_preserves_history_and_reviews_only_once(self):
         history = [
             ChatMessage(role="user", content="What classes do I have today?"),

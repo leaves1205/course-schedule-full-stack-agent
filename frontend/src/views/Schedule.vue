@@ -2,19 +2,20 @@
   <div>
     <el-card>
       <template #header>
-        <div style="font-size: 16px; font-weight: bold">My schedule</div>
+        <div style="font-size: 16px; font-weight: bold">Classes</div>
       </template>
-      <div style="margin-bottom: 10px">
+      <div class="table-toolbar">
         <el-date-picker
           v-model="params.date"
           type="date"
           value-format="YYYY-MM-DD"
-          placeholder="Filter by date; clear to show all"
+          placeholder="Filter by date"
+          aria-label="Filter by date"
           clearable
           @change="handleSearch"
           @clear="handleSearch"
         />
-        <el-button style="margin-left: 8px" type="primary" @click="handleSearch">Search</el-button>
+        <el-button @click="handleSearch">Search</el-button>
       </div>
       <el-table
         :data="tableData"
@@ -23,10 +24,10 @@
       >
         <el-table-column prop="class_date" label="Date" width="140" />
         <el-table-column prop="period" label="Period" width="120" />
-        <el-table-column prop="course_name" label="Course" min-width="140" />
-        <el-table-column prop="location" label="Location" />
+        <el-table-column prop="course_name" label="Course" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="location" label="Location" min-width="160" show-overflow-tooltip />
       </el-table>
-      <div style="margin-top: 10px; display: flex; justify-content: flex-end">
+      <div class="table-pagination">
         <el-pagination
           v-model:current-page="params.page"
           v-model:page-size="params.pageSize"

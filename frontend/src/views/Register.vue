@@ -1,57 +1,53 @@
 <template>
-  <div class="register-container">
-    <div class="register-box">
-      <h1 style="font-size: 24px; margin-bottom: 30px">Welcome to the laboratory booking system</h1>
-
-      <el-form ref="formRef" :rules="rules" :model="form" label-width="0px" style="width: 100%">
-        <el-form-item prop="username">
-          <el-input
-            size="large"
-            v-model="form.username"
-            placeholder="Please enter a username"
-            :prefix-icon="User"
-          />
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input
-            type="password"
-            size="large"
-            v-model="form.password"
-            placeholder="Please enter a password"
-            :prefix-icon="Lock"
-            show-password
-          />
-        </el-form-item>
-        <el-form-item prop="confirmPassword">
-          <el-input
-            type="password"
-            size="large"
-            v-model="form.confirmPassword"
-            placeholder="Please confirm the password"
-            :prefix-icon="Lock"
-            show-password
-          />
-        </el-form-item>
-        <div>
-          <el-button
-            size="large"
-            type="primary"
-            :loading="loadingValue"
-            style="width: 100%"
-            @click="register"
-            >Register</el-button
-          >
-          <div style="text-align: right; margin-top: 20px">
-            Already have an account? Please
-            <router-link style="color: var(--el-color-primary)" to="/login">Sign in</router-link>
-          </div>
-        </div>
-      </el-form>
-    </div>
-  </div>
+  <AuthLayout title="Create an account" description="Register to access your course workspace.">
+    <el-form
+      ref="formRef"
+      :rules="rules"
+      :model="form"
+      label-position="top"
+      @submit.prevent="register"
+    >
+      <el-form-item label="Username" prop="username"
+        ><el-input
+          v-model="form.username"
+          placeholder="Enter your username"
+          autocomplete="username"
+          :prefix-icon="User"
+      /></el-form-item>
+      <el-form-item label="Password" prop="password"
+        ><el-input
+          v-model="form.password"
+          type="password"
+          placeholder="Enter your password"
+          autocomplete="new-password"
+          :prefix-icon="Lock"
+          show-password
+      /></el-form-item>
+      <el-form-item label="Confirm password" prop="confirmPassword"
+        ><el-input
+          v-model="form.confirmPassword"
+          type="password"
+          placeholder="Confirm your password"
+          autocomplete="new-password"
+          show-password
+          :prefix-icon="Lock"
+      /></el-form-item>
+      <el-button
+        type="primary"
+        native-type="submit"
+        :loading="loadingValue"
+        style="width: 100%; margin-top: 8px"
+        >Create account</el-button
+      >
+    </el-form>
+    <template #switch
+      >Already have an account?<RouterLink to="/login">Sign in</RouterLink></template
+    >
+  </AuthLayout>
 </template>
 
 <script setup>
+import AuthLayout from '@/layouts/AuthLayout.vue'
 import { reactive, ref } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -100,20 +96,3 @@ const register = async () => {
   }
 }
 </script>
-
-<style scoped>
-.register-container {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.register-box {
-  width: 380px;
-  border-radius: 8px;
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-  text-align: center;
-  background-color: white;
-}
-</style>

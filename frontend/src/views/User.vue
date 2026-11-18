@@ -3,20 +3,23 @@
     <el-card>
       <template #header>
         <div style="font-size: 16px; font-weight: bold">
-          <span>User management</span>
+          <span>User list</span>
         </div>
       </template>
-      <div style="margin-bottom: 10px">
+      <div class="table-toolbar">
         <el-input
           placeholder="Search by username or name"
+          aria-label="Search users"
           v-model="params.keywords"
-          style="width: 240px; margin-right: 8px"
+          style="width: 280px"
           clearable
           @keyup.enter="handleSearch"
           @clear="handleSearch"
         ></el-input>
-        <el-button type="primary" :icon="Search" @click="handleSearch">Search</el-button>
-        <el-button type="success" :icon="Plus" @click="handleCreate">Add</el-button>
+        <el-button :icon="Search" @click="handleSearch">Search</el-button>
+        <el-button class="toolbar-create" type="primary" :icon="Plus" @click="handleCreate"
+          >Add user</el-button
+        >
       </div>
 
       <el-table
@@ -25,23 +28,23 @@
         style="width: 100%"
         v-loading="loading"
       >
-        <el-table-column prop="username" label="Username" />
-        <el-table-column prop="name" label="Name" />
-        <el-table-column prop="avatar" label="Avatar">
+        <el-table-column prop="username" label="Username" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="name" label="Name" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="avatar" label="Avatar" width="80">
           <template #default="{ row }">
-            <div style="min-height: 50px">
+            <div style="min-height: 32px">
               <img
                 v-if="row.avatar"
-                style="display: block; width: 50px; height: 50px; border-radius: 50%"
+                style="display: block; width: 32px; height: 32px; border-radius: 50%"
                 :src="row.avatar"
                 alt=""
               />
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="email" label="Email" />
-        <el-table-column prop="phone" label="Phone number" />
-        <el-table-column prop="role" label="Role" width="100">
+        <el-table-column prop="email" label="Email" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="phone" label="Phone number" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="role" label="Role" width="130">
           <template #default="{ row }">
             {{ row.role === 'admin' ? 'Administrator' : 'Student' }}
           </template>
@@ -53,15 +56,15 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Actions" width="160">
+        <el-table-column label="Actions" width="140" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" text bg @click="handleEdit(row)">Edit</el-button>
-            <el-button type="danger" text bg @click="handleDelete(row)">Delete</el-button>
+            <el-button type="primary" link @click="handleEdit(row)">Edit</el-button>
+            <el-button type="danger" link @click="handleDelete(row)">Delete</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <div style="margin-top: 10px; display: flex; justify-content: flex-end">
+      <div class="table-pagination">
         <el-pagination
           v-model:current-page="params.page"
           v-model:page-size="params.pageSize"
@@ -78,13 +81,17 @@
         ref="formRef"
         :rules="rules"
         :model="form"
-        label-width="80px"
-        style="width: 100%; padding-right: 30px; padding-top: 16px"
+        label-position="top"
+        style="width: 100%; padding-top: 8px"
         v-loading="loading"
       >
         <el-form-item label="Username" prop="username">
           <!-- Disable this field when form.id is set, which indicates editing. -->
-          <el-input :disabled="!!form.id" v-model="form.username" placeholer="Please enter a username" />
+          <el-input
+            :disabled="!!form.id"
+            v-model="form.username"
+            placeholder="Please enter a username"
+          />
         </el-form-item>
         <el-form-item v-if="!form.id" label="Password" prop="password">
           <el-input
@@ -95,7 +102,7 @@
           />
         </el-form-item>
         <el-form-item label="Name" prop="name">
-          <el-input v-model="form.name" placeholer="Please enter a name" />
+          <el-input v-model="form.name" placeholder="Please enter a name" />
         </el-form-item>
         <el-form-item label="Role" prop="role">
           <el-select v-model="form.role">
@@ -104,10 +111,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Email" prop="email">
-          <el-input v-model="form.email" placeholer="Please enter an email address" />
+          <el-input v-model="form.email" placeholder="Please enter an email address" />
         </el-form-item>
         <el-form-item label="Phone number" prop="phone">
-          <el-input v-model="form.phone" placeholer="Please enter a phone number" />
+          <el-input v-model="form.phone" placeholder="Please enter a phone number" />
         </el-form-item>
         <el-form-item label="Status">
           <el-radio-group v-model="form.status">
@@ -205,15 +212,15 @@ const handleEdit = (row) => {
 
 // Delete user information.
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`Delete user [${row.username}]?`, 'Confirm deletion', { type: 'warning' }).then(
-    async () => {
-      const res = await deleteUserApi(row.id)
-      if (res.code === 200) {
-        ElMessage.success('User deleted successfully')
-        load()
-      }
+  ElMessageBox.confirm(`Delete user [${row.username}]?`, 'Confirm deletion', {
+    type: 'warning'
+  }).then(async () => {
+    const res = await deleteUserApi(row.id)
+    if (res.code === 200) {
+      ElMessage.success('User deleted successfully')
+      load()
     }
-  )
+  })
 }
 
 // Save the user.

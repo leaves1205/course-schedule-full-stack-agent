@@ -2,14 +2,13 @@
   <div>
     <el-card>
       <template #header>
-        <div style="font-size: 16px; font-weight: bold">Schedule management</div>
+        <div style="font-size: 16px; font-weight: bold">Schedule list</div>
       </template>
-      <div
-        style="margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center"
-      >
+      <div class="table-toolbar">
         <el-select
           v-model="params.userId"
           placeholder="Filter by user"
+          aria-label="Filter by user"
           clearable
           filterable
           style="width: 220px"
@@ -28,12 +27,15 @@
           type="date"
           value-format="YYYY-MM-DD"
           placeholder="Filter by date"
+          aria-label="Filter by date"
           clearable
           @change="handleSearch"
           @clear="handleSearch"
         />
-        <el-button type="primary" :icon="Search" @click="handleSearch">Search</el-button>
-        <el-button type="success" :icon="Plus" @click="handleCreate">Add schedule</el-button>
+        <el-button :icon="Search" @click="handleSearch">Search</el-button>
+        <el-button class="toolbar-create" type="primary" :icon="Plus" @click="handleCreate"
+          >Add schedule</el-button
+        >
       </div>
       <el-table
         v-loading="loading"
@@ -50,12 +52,12 @@
         <el-table-column prop="location" label="Location" min-width="120" />
         <el-table-column label="Actions" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" text bg @click="handleEdit(row)">Edit</el-button>
-            <el-button type="danger" text bg @click="handleDelete(row)">Delete</el-button>
+            <el-button type="primary" link @click="handleEdit(row)">Edit</el-button>
+            <el-button type="danger" link @click="handleDelete(row)">Delete</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <div style="margin-top: 10px; display: flex; justify-content: flex-end">
+      <div class="table-pagination">
         <el-pagination
           v-model:current-page="params.page"
           v-model:page-size="params.pageSize"
@@ -76,11 +78,16 @@
         ref="formRef"
         :model="form"
         :rules="rules"
-        label-width="90px"
-        style="padding-right: 20px; padding-top: 8px"
+        label-position="top"
+        style="padding-top: 8px"
       >
         <el-form-item label="Student" prop="user_id">
-          <el-select v-model="form.user_id" placeholder="Select a student" filterable style="width: 100%">
+          <el-select
+            v-model="form.user_id"
+            placeholder="Select a student"
+            filterable
+            style="width: 100%"
+          >
             <el-option
               v-for="u in studentOptions"
               :key="u.id"
@@ -90,7 +97,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Course" prop="course_id">
-          <el-select v-model="form.course_id" placeholder="Select a course" filterable style="width: 100%">
+          <el-select
+            v-model="form.course_id"
+            placeholder="Select a course"
+            filterable
+            style="width: 100%"
+          >
             <el-option
               v-for="c in courseOptions"
               :key="c.id"

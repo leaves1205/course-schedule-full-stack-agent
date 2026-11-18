@@ -2,7 +2,7 @@
   <div>
     <el-card>
       <template #header>
-        <div style="font-size: 16px; font-weight: bold">Study plans</div>
+        <div style="font-size: 16px; font-weight: bold">New study plan</div>
       </template>
       <el-form @submit.prevent>
         <el-input
@@ -12,12 +12,14 @@
           maxlength="2000"
           show-word-limit
           placeholder="Write and save a study plan for preparation or review"
+          aria-label="Study plan content"
         />
         <div style="margin-top: 10px">
           <el-button type="primary" :loading="saving" @click="handleSave">Save</el-button>
         </div>
       </el-form>
       <el-divider />
+      <h2 class="section-title">Saved plans</h2>
       <el-table
         :data="tableData"
         v-loading="loading"
@@ -38,7 +40,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div style="margin-top: 10px; display: flex; justify-content: flex-end">
+      <div class="table-pagination">
         <el-pagination
           v-model:current-page="params.page"
           v-model:page-size="params.pageSize"
@@ -49,7 +51,13 @@
         />
       </div>
     </el-card>
-    <el-dialog v-model="detailVisible" title="Plan details" width="50%" destroy-on-close append-to-body>
+    <el-dialog
+      v-model="detailVisible"
+      title="Plan details"
+      width="50%"
+      destroy-on-close
+      append-to-body
+    >
       <div class="detail-meta">Created at: {{ formatTime(detailRow?.create_time) }}</div>
       <div class="plan-md" v-html="parseMarkdown(detailRow?.content)"></div>
     </el-dialog>
@@ -147,13 +155,15 @@ const handleSave = async () => {
 }
 
 const handleDelete = (row) => {
-  ElMessageBox.confirm('Delete this study plan?', 'Confirm deletion', { type: 'warning' }).then(async () => {
-    const res = await deleteStudyPlan(row.id)
-    if (res.code === 200) {
-      ElMessage.success('Deleted')
-      await load()
+  ElMessageBox.confirm('Delete this study plan?', 'Confirm deletion', { type: 'warning' }).then(
+    async () => {
+      const res = await deleteStudyPlan(row.id)
+      if (res.code === 200) {
+        ElMessage.success('Deleted')
+        await load()
+      }
     }
-  })
+  )
 }
 
 onMounted(() => {

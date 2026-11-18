@@ -39,6 +39,16 @@ coverage/
 # Uploaded user content
 backend/uploads/*
 !backend/uploads/.gitkeep
+backend/data/
+
+# Database exports and backups
+*.dump
+*.sql.gz
+*.sql.bz2
+*.sql.xz
+*.rdb
+dump.sql
+backup*.sql
 
 # Machine-specific files, logs and editor settings
 .DS_Store

@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 40%">
+  <div class="account-page">
     <el-card>
       <template #header>
         <div style="font-size: 16px; font-weight: bold">
@@ -10,8 +10,8 @@
         ref="formRef"
         :rules="rules"
         :model="form"
-        label-width="80px"
-        style="width: 100%; padding-right: 50px"
+        label-position="top"
+        style="width: 100%"
         v-loading="loading"
       >
         <el-form-item label="Avatar">
@@ -27,22 +27,24 @@
           </el-upload>
         </el-form-item>
         <el-form-item label="Username">
-          <el-input disabled v-model="form.username" placeholer="Please enter a username" />
+          <el-input disabled v-model="form.username" placeholder="Please enter a username" />
         </el-form-item>
         <el-form-item label="Name" prop="name">
-          <el-input v-model="form.name" placeholer="Please enter a name" />
+          <el-input v-model="form.name" placeholder="Please enter a name" />
         </el-form-item>
         <el-form-item label="Role">
           <el-input disabled v-model="roleLabel" />
         </el-form-item>
         <el-form-item label="Email" prop="email">
-          <el-input v-model="form.email" placeholer="Please enter an email address" />
+          <el-input v-model="form.email" placeholder="Please enter an email address" />
         </el-form-item>
         <el-form-item label="Phone number" prop="phone">
-          <el-input v-model="form.phone" placeholer="Please enter a phone number" />
+          <el-input v-model="form.phone" placeholder="Please enter a phone number" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="submitting" @click="handleSubmit">Save changes</el-button>
+          <el-button type="primary" :loading="submitting" @click="handleSubmit"
+            >Save changes</el-button
+          >
         </el-form-item>
       </el-form>
     </el-card>
@@ -77,7 +79,11 @@ const rules = {
 }
 
 const roleLabel = computed(() => {
-  return form.role === 'admin' ? 'Administrator' : form.role === 'student' ? 'Student' : 'Unknown role'
+  return form.role === 'admin'
+    ? 'Administrator'
+    : form.role === 'student'
+      ? 'Student'
+      : 'Unknown role'
 })
 
 const beforeAvatarUpload = (file) => {

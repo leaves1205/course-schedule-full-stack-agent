@@ -45,3 +45,5 @@ ALLOWED_EXTENSIONS = {
     ".zip",
 }
 STUDY_PLAN_MAX_LENGTH = 2000
+KB_DIR = BASE_DIR / "data" / "kb"
+KB_DIR.mkdir(parents=True, exist_ok=True)

@@ -2,19 +2,22 @@
   <div>
     <el-card>
       <template #header>
-        <div style="font-size: 16px; font-weight: bold">Course management</div>
+        <div style="font-size: 16px; font-weight: bold">Course list</div>
       </template>
-      <div style="margin-bottom: 10px">
+      <div class="table-toolbar">
         <el-input
           v-model="keywords"
           placeholder="Search by name, code or description"
-          style="width: 260px; margin-right: 8px"
+          aria-label="Search courses"
+          style="width: 300px"
           clearable
           @keyup.enter="handleSearch"
           @clear="handleSearch"
         />
-        <el-button type="primary" :icon="Search" @click="handleSearch">Search</el-button>
-        <el-button type="success" :icon="Plus" @click="handleCreate">Add course</el-button>
+        <el-button :icon="Search" @click="handleSearch">Search</el-button>
+        <el-button class="toolbar-create" type="primary" :icon="Plus" @click="handleCreate"
+          >Add course</el-button
+        >
       </div>
       <el-table
         v-loading="loading"
@@ -24,7 +27,12 @@
       >
         <el-table-column prop="name" label="Course name" min-width="140" />
         <el-table-column prop="code" label="Course code" width="120" />
-        <el-table-column prop="description" label="Description" min-width="200" show-overflow-tooltip />
+        <el-table-column
+          prop="description"
+          label="Description"
+          min-width="200"
+          show-overflow-tooltip
+        />
         <el-table-column prop="status" label="Status" width="90">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'info'">
@@ -34,8 +42,8 @@
         </el-table-column>
         <el-table-column label="Actions" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" text bg @click="handleEdit(row)">Edit</el-button>
-            <el-button type="danger" text bg @click="handleDelete(row)">Delete</el-button>
+            <el-button type="primary" link @click="handleEdit(row)">Edit</el-button>
+            <el-button type="danger" link @click="handleDelete(row)">Delete</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -45,8 +53,8 @@
         ref="formRef"
         :model="form"
         :rules="rules"
-        label-width="90px"
-        style="padding-right: 20px; padding-top: 8px"
+        label-position="top"
+        style="padding-top: 8px"
       >
         <el-form-item label="Course name" prop="name">
           <el-input v-model="form.name" placeholder="For example: Data Structures" />
