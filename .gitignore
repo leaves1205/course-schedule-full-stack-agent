@@ -1,0 +1,58 @@
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+.envrc
+.direnv/
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+*service-account*.json
+.aws/
+.ssh/
+
+# Python environments, caches and local databases
+.venv*/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.db
+*.sqlite
+*.sqlite3
+
+# JavaScript dependencies and generated output
+node_modules/
+dist/
+dist-ssr/
+coverage/
+*.tsbuildinfo
+.eslintcache
+
+# Uploaded user content
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Machine-specific files, logs and editor settings
+.DS_Store
+Thumbs.db
+*.log
+*.local
+logs/
+.vscode/
+.idea/
+.codex/
+.agents/
+*.swp
+*.swo
+*.bak
+*.zip
+*.tar
+*.tar.gz
