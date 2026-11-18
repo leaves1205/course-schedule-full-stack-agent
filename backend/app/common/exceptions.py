@@ -8,9 +8,10 @@ from app.common.response import Response
 class BusinessException(Exception):
     """Custom business exception."""
 
-    def __init__(self, message: str, code: int = 500):
+    def __init__(self, message: str, code: int = 500, data=None):
         self.message = message
         self.code = code
+        self.data = data
         super().__init__(message)
 
 
@@ -18,7 +19,7 @@ async def business_exception_handler(request: Request, exc: BusinessException):
     """Handle custom business exceptions."""
     return JSONResponse(
         status_code=200,
-        content=Response.error(code=exc.code, message=exc.message).model_dump(),
+        content=Response(code=exc.code, message=exc.message, data=exc.data).model_dump(),
     )
 
 

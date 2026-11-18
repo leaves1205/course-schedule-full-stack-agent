@@ -130,6 +130,10 @@ const pages = {
     title: 'Courses',
     description: 'Manage your course catalog.'
   },
+  '/manager/semesters': {
+    title: 'Semesters',
+    description: 'Set the first teaching Monday and number of weeks for each semester.'
+  },
   '/manager/documents': {
     title: 'Documents',
     description: 'Upload and manage course materials.'
@@ -137,7 +141,7 @@ const pages = {
   '/manager/user': { title: 'Users', description: 'Manage student and administrator accounts.' },
   '/manager/scheduleManage': {
     title: 'Schedules',
-    description: 'Assign courses and manage class schedules.'
+    description: 'Set weekly rules once, generate class sessions, and manage single-class changes.'
   },
   '/manager/profile': {
     title: 'My profile',

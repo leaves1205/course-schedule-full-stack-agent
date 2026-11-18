@@ -8,6 +8,7 @@ The assistant queries the signed-in user's schedule through a JWT-bound MCP tool
 
 - **Authentication:** registration, sign-in, JWT validation, profiles, avatars, and password changes.
 - **Role-based management:** administrators manage users, courses, and class schedules; students view their own schedules and study plans.
+- **Semester scheduling:** configure the first teaching Monday and semester length, then enter weekly meeting rows to generate dated class sessions in one transaction. Repeating the same request preserves existing sessions, including individual changes and cancellations.
 - **Course assistant:** ask about dates, courses, class periods, and locations, including contextual follow-up questions.
 - **Input guardrails:** classify requests as `allow`, `deny`, or `clarify`; unrelated requests receive a fixed response. Review failures stop processing.
 - **Streaming chat:** display answer fragments, processing status, and tool activity; internal review output is excluded from the stream.
@@ -108,7 +109,13 @@ Alternatively, import the schema-only script:
 mysql -u your_mysql_user -p course_schedule < sql/backend.sql
 ```
 
-The script includes the `users`, `course`, `schedules`, and `study_plan` tables. It contains no user records, password hashes, contact details, or uploaded files, and does not drop existing tables.
+The script includes all application tables, including `semesters`, `schedule_rules`, and `schedules`. It contains no user records, password hashes, contact details, or uploaded files, and does not drop existing tables.
+
+Existing installations receive an additive schema upgrade when FastAPI starts. The upgrade creates the semester/rule tables, adds nullable rule and original-date references, period bounds, cancellation/exception flags, and unique occurrence indexes to the existing `schedules` table. Existing records and their original period text are preserved. Parseable legacy periods are backfilled into numeric bounds. The database account needs permission to create tables, alter `schedules`, and create indexes. You can also run the repeatable upgrade explicitly from `backend/`:
+
+```bash
+./.venv/bin/python migrate_schedule.py
+```
 
 ### 3. Install backend dependencies
 
@@ -169,6 +176,18 @@ There are **no bundled login credentials or pre-created accounts**.
 4. Use the administrator pages to create courses and assign schedules to registered users.
 5. Sign in as a student and query the assigned schedule in the course assistant.
 
+## Generate a semester schedule
+
+1. As an administrator, open **Semesters** and add a name, the Monday of teaching week 1, and the number of teaching weeks (for example, 16).
+2. Open **Schedules → Generate semester schedule**. Select the semester, student, course, and inclusive week range.
+3. Add one row per weekly meeting, for example Monday periods 1–2 and Thursday periods 3–4, both in A201. The form previews **32 planned classes** for weeks 1–16.
+4. Save once. The backend validates the entire batch against existing classes and other meeting rows; any inclusive period overlap for the same student/date returns conflict details and saves nothing.
+5. Use **Weekly rules** to see saved recurring patterns. **Generate missing classes** fills missing occurrences while preserving existing ones. Repeating the same generation request reuses its rules and does not duplicate classes.
+
+**Edit this class** changes only one generated occurrence and marks it as adjusted. **Cancel class** keeps a cancellation record; **Restore** rechecks conflicts before reactivating it. Students and the MCP assistant see only classes that have not been cancelled. The immutable `source_date` prevents a moved or cancelled occurrence from being recreated at its original date.
+
+**Add one-off class** remains available. Once a semester has weekly rules, its teaching start and week count are locked; its name can still be edited. This version supports weekly generation and individual adjustments. Editing a rule's future occurrences as a series is a separate operation for a later update.
+
 ## Chat behavior
 
 Example requests:
@@ -194,6 +213,10 @@ Conversation memory is stored in the current tab's `sessionStorage`, scoped to t
 | `/api/user` | Profiles, password changes, and administrator user management |
 | `/api/courses` | Course management |
 | `/api/schedules` | Schedule management and personal schedule queries |
+| `POST /api/schedules/generate` | Administrator batch generation from weekly meeting rows |
+| `POST /api/schedules/{id}/restore` | Restore one cancelled generated class after conflict checks |
+| `/api/semesters` | Administrator semester configuration |
+| `/api/schedule-rules` | Administrator rule listing; `POST /{id}/generate` regenerates missing occurrences |
 | `/api/study-plans` | Personal study plans |
 | `/api/files` | File uploads |
 | `/api/documents` | Administrator document uploads, listing, deletion, and text previews |

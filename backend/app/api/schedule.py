@@ -11,6 +11,8 @@ from app.schemas.schedule import (
     ScheduleCreateRequest,
     ScheduleUpdateRequest,
 )
+from app.schemas.schedule_rule import ScheduleGenerateRequest
+from app.services import schedule_rule_service
 
 router = APIRouter(prefix="/schedules", tags=["Schedule table"])
 
@@ -25,12 +27,15 @@ def list_page_schedules(
     ),
     page: int = Query(default=1, description="page number", ge=1),
     page_size: int = Query(default=10, description="page size", ge=1, le=100),
+    semester_id: int | None = Query(default=None, gt=0),
+    include_cancelled: bool = False,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     if current_user.role != "admin":
         user_id = current_user.id
-    data = schedule_service.list_page_schedules(db, user_id, date, page, page_size)
+        include_cancelled = False
+    data = schedule_service.list_page_schedules(db, user_id, date, page, page_size, semester_id, include_cancelled)
     return Response.success(data=data)
 
 
@@ -42,6 +47,20 @@ def create_schedule(
 ):
     res = schedule_service.create_schedule(db, data)
     return Response.success(data=res)
+
+
+@router.post("/generate")
+def generate_schedules(
+    data: ScheduleGenerateRequest,
+    _: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return Response.success(data=schedule_rule_service.generate_schedules(db, data))
+
+
+@router.post("/{schedule_id}/restore")
+def restore_schedule(schedule_id: int, _: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return Response.success(data=schedule_service.restore_schedule(db, schedule_id))
 
 
 @router.put("/{schedule_id}")

@@ -38,6 +38,14 @@ class ScheduleResponse(BaseModel):
     period: str
     course_id: int
     course_name: str
-    location: str
+    location: str | None
+    rule_id: int | None = None
+    source_date: date | None = None
+    start_period: int | None = None
+    end_period: int | None = None
+    is_exception: bool = False
+    is_cancelled: bool = False
+    semester_id: int | None = None
+    semester_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)

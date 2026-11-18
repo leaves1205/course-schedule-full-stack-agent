@@ -31,3 +31,12 @@ export function deleteScheduleApi(id) {
     method: 'delete'
   })
 }
+
+export const generateSchedulesApi = (data) =>
+  request({ url: '/api/schedules/generate', method: 'post', data })
+export const listScheduleRulesApi = (params) =>
+  request({ url: '/api/schedule-rules', method: 'get', params })
+export const regenerateScheduleRuleApi = (id) =>
+  request({ url: `/api/schedule-rules/${id}/generate`, method: 'post' })
+export const restoreScheduleApi = (id) =>
+  request({ url: `/api/schedules/${id}/restore`, method: 'post' })

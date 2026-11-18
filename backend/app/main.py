@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from app.config import UPLOAD_DIR
 from app.models.user import *
 from app.database import Base, engine
+from app.database_migrations import initialize_database
 from app.api import api
 from starlette.middleware.cors import CORSMiddleware
 from app.common.exceptions import (
@@ -15,7 +16,7 @@ from app.common.exceptions import (
     global_excpetion_hadler,
 )
 
-Base.metadata.create_all(bind=engine)  # Create database tables automatically.
+initialize_database(engine)
 
 
 @asynccontextmanager

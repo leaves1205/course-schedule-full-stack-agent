@@ -84,6 +84,7 @@ const workspaceLinks = computed(() => [
   ...(isAdmin.value
     ? [
         { to: '/manager/course', label: 'Courses', icon: Reading },
+        { to: '/manager/semesters', label: 'Semesters', icon: Calendar },
         { to: '/manager/scheduleManage', label: 'Schedules', icon: Calendar },
         { to: '/manager/user', label: 'Users', icon: UserFilled },
         { to: '/manager/documents', label: 'Documents', icon: Document }

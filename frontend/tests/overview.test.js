@@ -146,6 +146,7 @@ test('sidebar separates student and administrator navigation', (t) => {
     [
       '/manager/home',
       '/manager/course',
+      '/manager/semesters',
       '/manager/scheduleManage',
       '/manager/user',
       '/manager/documents',
