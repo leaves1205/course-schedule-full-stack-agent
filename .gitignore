@@ -36,6 +36,10 @@ coverage/
 *.tsbuildinfo
 .eslintcache
 
+# Local demo recordings and generated artifacts
+/recording/
+/recordings/
+
 # Uploaded user content
 backend/uploads/*
 !backend/uploads/.gitkeep

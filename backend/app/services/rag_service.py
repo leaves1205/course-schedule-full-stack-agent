@@ -10,21 +10,21 @@ logger = logging.getLogger(__name__)
 
 
 def extract_document_text(path: Path) -> str:
-    """从支持的资料文件中提取纯文本，空内容或解析失败时抛出业务异常。"""
-    # 数据库记录可能存在，但磁盘文件已被手动移走。
+    """Extract plain text from supported documents, raising a business exception for empty content or parsing failures."""
+    # The database record may exist even if the file has been manually moved from disk.
     if not path.is_file():
-        raise BusinessException(message="资料文件不存在", code=404)
+        raise BusinessException(message="Document file not found", code=404)
     ext = path.suffix.lower()
     try:
-        # 文本文件直接读取；utf-8-sig 同时接受带 BOM 和不带 BOM 的 UTF-8。
+        # Read text files directly; utf-8-sig accepts UTF-8 both with and without a BOM.
         if ext in {".txt", ".md"}:
             text = path.read_text(encoding="utf-8-sig")
-        # PDF 按页提取文字，没有文字的页用空字符串连接。
+        # Extract PDF text page by page, using an empty string for pages without text.
         elif ext == ".pdf":
             with path.open("rb") as source:
                 reader = PdfReader(source)
                 text = "\n".join(page.extract_text() or "" for page in reader.pages)
-        # DOCX 读取正文段落与表格单元格，不保留排版。
+        # Read DOCX paragraphs and table cells without preserving formatting.
         elif ext == ".docx":
             doc = Document(str(path))
             parts = [p.text for p in doc.paragraphs]
@@ -34,22 +34,22 @@ def extract_document_text(path: Path) -> str:
                 for row in table.rows
             )
             text = "\n".join(parts)
-        # 只处理已约定的四种格式，旧版 .doc 也不在范围内。
+        # Handle only the four supported formats; legacy .doc files are excluded.
         else:
-            raise BusinessException(message="不支持的文档格式", code=400)
+            raise BusinessException(message="Unsupported document format", code=400)
     except BusinessException:
         raise
     except Exception as exc:
-        logger.exception("提取文档文字失败：%s", path.name)
+        logger.exception("Failed to extract document text: %s", path.name)
         raise BusinessException(
-            message="无法读取文档，请确认文件未损坏、未加密，且文本文件采用 UTF-8 编码",
+            message="Unable to read the document. Ensure the file is not corrupted or encrypted and text files use UTF-8 encoding",
             code=400,
         ) from exc
 
     text = text.strip()
-    # 空白文档或没有文字层的扫描件不能提供文字预览。
+    # Blank documents and scanned files without a text layer cannot provide a text preview.
     if not text:
         raise BusinessException(
-            message="未能抽取到文本，空白文档或扫描件无法预览", code=400
+            message="No text could be extracted. Blank documents or scanned files cannot be previewed", code=400
         )
     return text

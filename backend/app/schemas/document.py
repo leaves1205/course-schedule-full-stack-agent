@@ -4,25 +4,25 @@ from pydantic import BaseModel, ConfigDict
 
 
 class KbDocumentResponse(BaseModel):
-    """上传结果和资料列表共用的资料记录。"""
+    """Document record shared by upload results and document lists."""
 
     id: int
-    original_name: str  # 上传时的文件名，供页面显示
-    disk_name: str  # 为避免重名而生成的磁盘文件名
-    rel_path: str  # 相对于 data/kb 的保存路径
-    size: int  # 文件大小，单位为字节
-    ext: str  # 小写扩展名，例如 .pdf
-    create_time: datetime  # 资料记录的创建时间
+    original_name: str  # Filename provided at upload, displayed on the page
+    disk_name: str  # Filename generated for disk storage to avoid duplicates
+    rel_path: str  # Storage path relative to data/kb
+    size: int  # File size in bytes
+    ext: str  # Lowercase extension, such as .pdf
+    create_time: datetime  # Creation time of the document record
 
-    # 列表和上传服务返回 ORM 记录时，允许直接读取模型属性。
+    # Allow reading model attributes directly when the list and upload services return ORM records.
     model_config = ConfigDict(from_attributes=True)
 
 
 class DocumentPreviewResponse(BaseModel):
-    """预览接口返回的资料信息和抽取后的纯文本。"""
+    """Document metadata and extracted plain text returned by the preview endpoint."""
 
     id: int
     original_name: str
     ext: str
-    text: str  # 从文件中抽取、用于页面预览的纯文本
-    char_count: int  # text 的字符数，不是原文件的字节数
+    text: str  # Plain text extracted from the file for preview on the page
+    char_count: int  # Number of characters in text, not the original file's byte count

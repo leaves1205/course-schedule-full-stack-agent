@@ -9,14 +9,14 @@ from app.dependencies.auth import get_current_admin
 from app.models.user import User
 from app.services import document_service
 
-# 路由统一使用 /documents 前缀，各接口仍分别声明管理员鉴权依赖。
-router = APIRouter(prefix="/documents", tags=["文档管理"])
+# All routes use the /documents prefix; each endpoint still declares its own administrator authentication dependency.
+router = APIRouter(prefix="/documents", tags=["Document management"])
 
 
 @router.get(
     "",
-    summary="获取文档列表",
-    description="管理员查看全部课程资料，按 ID 倒序返回。",
+    summary="List documents",
+    description="Administrators can view all course documents, returned in descending ID order.",
 )
 def list_documents(
     _current_user: Annotated[User, Depends(get_current_admin)],
@@ -27,11 +27,11 @@ def list_documents(
 
 @router.post(
     "",
-    summary="批量上传文档",
-    description="管理员在一次请求中上传多个资料文件；任一文件失败则撤销本批上传。",
+    summary="Upload documents in a batch",
+    description="Administrators can upload multiple documents in one request; if any file fails, the entire batch is rolled back.",
 )
 def upload_documents(
-    files: Annotated[list[UploadFile], File(description="本批上传的资料文件")],
+    files: Annotated[list[UploadFile], File(description="Document files to upload in this batch")],
     _current_user: Annotated[User, Depends(get_current_admin)],
     db: Annotated[Session, Depends(get_db)],
 ):
@@ -40,8 +40,8 @@ def upload_documents(
 
 @router.delete(
     "/{doc_id}",
-    summary="删除文档",
-    description="管理员根据文档 ID 删除资料记录及其保存的文件。",
+    summary="Delete document",
+    description="Administrators can delete a document record and its stored file by document ID.",
 )
 def delete_document(
     doc_id: int,
@@ -54,8 +54,8 @@ def delete_document(
 
 @router.get(
     "/{doc_id}/preview",
-    summary="预览文档文本",
-    description="管理员根据文档 ID 提取并查看资料中的纯文本。",
+    summary="Preview document text",
+    description="Administrators can extract and view plain text from a document by document ID.",
 )
 def preview_document(
     doc_id: int,
