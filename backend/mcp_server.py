@@ -6,7 +6,7 @@ from fastmcp.server.dependencies import get_http_headers
 from pydantic import Field
 from app.config import settings
 from app.database import SessionLocal
-from app.dependencies.mcp_auth import user_id_form_authorization
+from app.dependencies.mcp_auth import user_id_from_authorization
 from app.services.schedule_service import list_schedules_as_dict
 
 mcp = FastMCP("campus-course-agent")
@@ -20,7 +20,7 @@ def _current_user_id() -> int:
 
     headers = get_http_headers() or {}
     auth = headers.get("authorization") or headers.get("Authorization")
-    return user_id_form_authorization(auth)
+    return user_id_from_authorization(auth)
 
 
 @mcp.tool()

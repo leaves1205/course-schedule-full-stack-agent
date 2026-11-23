@@ -22,7 +22,8 @@ async def call_get_my_schedules(authorization: str, date: str | None = None) -> 
     tool = next((t for t in tools if t.name == "get_my_schedules"), None)
     if tool is None:
         raise BusinessException(
-            message="Tool [get_my_schedules] was not found. Check that the MCP service is running."
+            message="Tool [get_my_schedules] was not found. Check that the MCP service is running.",
+            code=503,
         )
     # 3. Invoke the tool.
     payload = {}

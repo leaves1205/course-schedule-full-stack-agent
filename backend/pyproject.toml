@@ -1,0 +1,9 @@
+# Tooling configuration only; dependencies live in requirements*.txt.
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# Pyflakes (unused imports and variables, undefined names) plus the pycodestyle checks that find real
+# bugs. Formatting rules are left out on purpose so enabling lint does not rewrite existing code.
+select = ["E4", "E7", "E9", "F"]

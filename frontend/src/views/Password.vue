@@ -45,6 +45,7 @@
 import { updatePassword } from '@/api/user'
 import router from '@/router'
 import { logout } from '@/utils/auth'
+import { newPasswordRule } from '@/utils/passwordRules'
 import { ElMessage } from 'element-plus'
 import { ref, reactive } from 'vue'
 
@@ -70,7 +71,10 @@ const validatePass = (rule, value, callback) => {
 
 const rules = {
   oldPassword: [{ required: true, message: 'Please enter your current password', trigger: 'blur' }],
-  newPassword: [{ required: true, message: 'Please enter a new password', trigger: 'blur' }],
+  newPassword: [
+    { required: true, message: 'Please enter a new password', trigger: 'blur' },
+    newPasswordRule
+  ],
   confirmPassword: [
     { validator: validatePass, message: 'Please confirm the new password', trigger: 'blur' }
   ]

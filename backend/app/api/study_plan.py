@@ -39,5 +39,5 @@ def delete_study_plan(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    row = study_plan_service.delete_study_plan(db, current_user, plan_id)
+    study_plan_service.delete_study_plan(db, current_user, plan_id)
     return Response.success()

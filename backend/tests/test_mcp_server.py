@@ -59,13 +59,13 @@ class MCPServerTests(unittest.TestCase):
             for header in (None, "", "Basic abc", "Bearer", "Bearer ", "Bearer    "):
                 with self.subTest(header=header):
                     with self.assertRaises(BusinessException) as caught:
-                        mcp_auth.user_id_form_authorization(header)
+                        mcp_auth.user_id_from_authorization(header)
                     self.assertEqual(caught.exception.code, 401)
             sessions.assert_not_called()
 
     def test_valid_bearer_token_resolves_active_user(self):
         with patch.object(mcp_auth, "SessionLocal", self.sessions):
-            user_id = mcp_auth.user_id_form_authorization(
+            user_id = mcp_auth.user_id_from_authorization(
                 f"bEaReR {create_access_token(1)}"
             )
         self.assertEqual(user_id, 1)
@@ -75,7 +75,7 @@ class MCPServerTests(unittest.TestCase):
             for user_id in (3, 999):
                 with self.subTest(user_id=user_id):
                     with self.assertRaises(BusinessException) as caught:
-                        mcp_auth.user_id_form_authorization(
+                        mcp_auth.user_id_from_authorization(
                             f"Bearer {create_access_token(user_id)}"
                         )
                     self.assertEqual(caught.exception.code, 401)

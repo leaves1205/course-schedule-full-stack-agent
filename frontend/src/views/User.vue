@@ -137,6 +137,7 @@ import { Search, Plus } from '@element-plus/icons-vue'
 import { createUserApi, deleteUserApi, getUserPageList, updateUserApi } from '@/api/user'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { newPasswordRule, usernameRule } from '@/utils/passwordRules'
 const params = reactive({
   page: 1,
   pageSize: 10,
@@ -162,13 +163,17 @@ const formLoading = ref(false)
 
 // Editing does not change the password; validate password only when creating a user.
 const rules = computed(() => ({
-  username: [{ required: true, message: 'Please enter a username', trigger: 'blur' }],
+  username: [
+    { required: true, message: 'Please enter a username', trigger: 'blur' },
+    // An existing username cannot be edited, and older accounts may predate this format.
+    ...(form.id ? [] : [usernameRule])
+  ],
   ...(form.id
     ? {}
     : {
         password: [
           { required: true, message: 'Please enter a password', trigger: 'blur' },
-          { min: 3, max: 10, message: 'Password must be 3-10 characters', trigger: 'blur' }
+          newPasswordRule
         ]
       }),
   name: [{ required: true, message: 'Please enter a name', trigger: 'blur' }],

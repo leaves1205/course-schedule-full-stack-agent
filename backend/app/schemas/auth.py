@@ -1,10 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.schemas.user import UserResponse
+from app.schemas.validators import NewPassword, Username
 
 
 class LoginRequest(BaseModel):
     username: str
+    # Login accepts whatever password is stored so accounts created before the password policy still work.
     password: str
 
 
@@ -14,6 +16,6 @@ class LoginResponse(BaseModel):
 
 
 class RegisterRequest(BaseModel):
-    username: str
-    password: str
-    name: str | None = None
+    username: Username
+    password: NewPassword
+    name: str | None = Field(default=None, max_length=50)

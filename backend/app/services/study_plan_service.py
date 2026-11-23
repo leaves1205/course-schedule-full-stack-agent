@@ -48,6 +48,6 @@ def delete_study_plan(db: Session, current_user: User, plan_id: int) -> None:
         .first()
     )
     if not row:
-        raise BusinessException(message="Study plan not found.")
+        raise BusinessException(message="Study plan not found.", code=404)
     db.delete(row)
     db.commit()

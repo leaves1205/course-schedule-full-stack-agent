@@ -4,7 +4,7 @@ from app.models.user import User
 from app.utils.jwt import decode_access_token
 
 
-def user_id_form_authorization(authorization: str | None) -> int:
+def user_id_from_authorization(authorization: str | None) -> int:
     """Extract user ID from the Authorization header."""
 
     if not authorization:

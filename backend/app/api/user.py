@@ -6,11 +6,9 @@ from app.dependencies.auth import get_current_admin, get_current_user
 from app.schemas.user import (
     PasswordUpdateRequest,
     UserCreateRequest,
-    UserResponse,
     UserUpdateRequest,
 )
 from app.services import user_service
-from app.services.user_service import get_user_info
 from app.database import get_db
 
 router = APIRouter(prefix="/user", tags=["User information API"])
