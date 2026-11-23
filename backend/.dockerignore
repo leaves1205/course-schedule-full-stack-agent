@@ -1,0 +1,17 @@
+.venv
+__pycache__
+*.pyc
+.env
+.env.*
+!.env.example
+tests
+uploads/*
+!uploads/.gitkeep
+data
+node_modules
+package.json
+package-lock.json
+*.db
+*.sqlite
+*.sqlite3
+.ruff_cache

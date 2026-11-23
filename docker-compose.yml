@@ -1,0 +1,73 @@
+# Full stack in one command:  cp .env.example .env  (fill it in)  &&  docker compose up --build
+# Then open http://localhost:8080 and create the first administrator:
+#   docker compose exec backend python manage.py create-admin YOUR_USERNAME
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: course_schedule
+      MYSQL_USER: course_app
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql+pymysql://course_app:${MYSQL_PASSWORD}@db:3306/course_schedule
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
+      MCP_HOST: mcp
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-deepseek-flash}
+    volumes:
+      - uploads:/app/uploads
+      - documents:/app/data/kb
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    # Not published: the browser reaches the API through the frontend's nginx proxy.
+
+  mcp:
+    build: ./backend
+    restart: unless-stopped
+    command: ["python", "mcp_server.py"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql+pymysql://course_app:${MYSQL_PASSWORD}@db:3306/course_schedule
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
+      # Listen on every interface of the private compose network. Nothing publishes this port.
+      MCP_HOST: 0.0.0.0
+    # Not published: only the backend talks to it.
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+
+volumes:
+  db-data:
+  uploads:
+  documents:
