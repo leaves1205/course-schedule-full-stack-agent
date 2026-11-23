@@ -52,6 +52,7 @@ import { reactive, ref } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { registerApi } from '@/api/auth'
+import { newPasswordRule, usernameRule } from '@/utils/passwordRules'
 import router from '@/router'
 
 const form = reactive({
@@ -76,8 +77,8 @@ const validatePass = (rule, value, callback) => {
   }
 }
 const rules = {
-  username: [{ required: true, message: 'Please enter a username', trigger: 'blur' }],
-  password: [{ required: true, message: 'Please enter a password', trigger: 'blur' }],
+  username: [{ required: true, message: 'Please enter a username', trigger: 'blur' }, usernameRule],
+  password: [{ required: true, message: 'Please enter a password', trigger: 'blur' }, newPasswordRule],
   confirmPassword: [{ validator: validatePass, trigger: 'blur' }]
 }
 

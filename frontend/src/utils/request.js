@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { getToken, logout } from './auth'
+import { settleFailedRequest } from './apiError'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
 
@@ -35,20 +36,14 @@ service.interceptors.response.use(
     return data
   },
   (err) => {
-    if (err.response) {
-      const httpStatusCode = err.response.status
-      if (httpStatusCode === 401) {
-        ElMessage.error('Your session has expired. Please sign in again.')
+    const outcome = settleFailedRequest(err, {
+      notify: (message) => ElMessage.error(message),
+      onSessionExpired: () => {
         logout()
         router.push('/login')
-      } else {
-        ElMessage.error(err.response.data?.message || 'Request failed')
       }
-    } else {
-      // The backend is unavailable or a network error occurred.
-      ElMessage.error('Network error. Check the backend service.')
-    }
-    return Promise.reject(err)
+    })
+    return 'resolve' in outcome ? outcome.resolve : Promise.reject(outcome.reject)
   }
 )
 
