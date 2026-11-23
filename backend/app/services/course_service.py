@@ -28,11 +28,12 @@ def create_course(db: Session, data: CourseCreateRequest) -> CourseResponse:
         raise BusinessException(message="course code is required")
     exist = db.query(Course).filter(Course.code == data.code.strip()).first()
     if exist:
-        raise BusinessException(message="course code already exists")
+        raise BusinessException(message="course code already exists", code=409)
     course = Course(
         name=data.name.strip(),
         code=data.code.strip(),
-        description=(data.description or "").strip() or None,
+        # The description column is NOT NULL, so "no description" is stored as an empty string.
+        description=(data.description or "").strip(),
         status=data.status if data.status in (0, 1) else 1,
     )
     db.add(course)
@@ -47,7 +48,7 @@ def update_course(
     """update course"""
     row = db.query(Course).filter(Course.id == course_id).first()
     if not row:
-        raise BusinessException(message="course not found")
+        raise BusinessException(message="course not found", code=404)
     payload = data.model_dump(exclude_none=True)
     if "name" in payload:
         payload["name"] = payload["name"].strip()
@@ -57,7 +58,7 @@ def update_course(
             db.query(Course).filter(Course.code == code, Course.id != course_id).first()
         )
         if conflict:
-            raise BusinessException(message="course code already exists")
+            raise BusinessException(message="course code already exists", code=409)
         payload["code"] = code
     if "description" in payload:
         payload["description"] = (payload["description"] or "").strip()
@@ -72,11 +73,11 @@ def delete_course(db: Session, course_id: int) -> None:
     """delete course"""
     row = db.query(Course).filter(Course.id == course_id).first()
     if not row:
-        raise BusinessException(message="course not found")
+        raise BusinessException(message="course not found", code=404)
     linked = db.query(Schedule).filter(Schedule.course_id == course_id).first()
     if linked:
         raise BusinessException(
-            message="course is linked to a schedule and cannot be deleted"
+            message="course is linked to a schedule and cannot be deleted", code=409
         )
     db.delete(row)
     db.commit()

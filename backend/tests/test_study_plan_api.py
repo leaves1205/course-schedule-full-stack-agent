@@ -13,9 +13,9 @@ from app.api.study_plan import router
 from app.common.exceptions import (
     BusinessException,
     business_exception_handler,
-    global_excpetion_hadler,
-    http_excpetion_hadler,
-    validation_excpetion_hadler,
+    global_exception_handler,
+    http_exception_handler,
+    validation_exception_handler,
 )
 from app.database import Base, get_db
 from app.models import StudyPlan, User
@@ -52,9 +52,9 @@ class StudyPlanAPITests(unittest.TestCase):
             allow_headers=["*"],
         )
         app.add_exception_handler(BusinessException, business_exception_handler)
-        app.add_exception_handler(HTTPException, http_excpetion_hadler)
-        app.add_exception_handler(RequestValidationError, validation_excpetion_hadler)
-        app.add_exception_handler(Exception, global_excpetion_hadler)
+        app.add_exception_handler(HTTPException, http_exception_handler)
+        app.add_exception_handler(RequestValidationError, validation_exception_handler)
+        app.add_exception_handler(Exception, global_exception_handler)
         app.include_router(router, prefix="/api")
 
         def test_db():

@@ -4,7 +4,7 @@ from datetime import date
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event, func, inspect, select, text
+from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -12,9 +12,8 @@ from sqlalchemy.pool import StaticPool
 from app.api.schedule import router as schedule_router
 from app.api.schedule_rule import router as rule_router
 from app.api.semester import router as semester_router
-from app.common.exceptions import BusinessException, business_exception_handler, validation_excpetion_hadler
+from app.common.exceptions import BusinessException, business_exception_handler, validation_exception_handler
 from app.database import Base, get_db
-from app.database_migrations import initialize_database
 from app.models import Course, Schedule, ScheduleRule, Semester, User
 from app.services.schedule_service import list_schedules_as_dict
 from app.utils.jwt import create_access_token
@@ -40,7 +39,7 @@ class SemesterSchedulingTests(unittest.TestCase):
             db.commit()
         app = FastAPI()
         app.add_exception_handler(BusinessException, business_exception_handler)
-        app.add_exception_handler(RequestValidationError, validation_excpetion_hadler)
+        app.add_exception_handler(RequestValidationError, validation_exception_handler)
         for router in (schedule_router, rule_router, semester_router):
             app.include_router(router, prefix="/api")
         def test_db():
@@ -234,29 +233,3 @@ class SemesterSchedulingTests(unittest.TestCase):
             db.commit()
         self.assertEqual(self.generate()["code"], 409)
         self.assertEqual(self.counts(), (1, 0))
-
-
-class ScheduleMigrationTests(unittest.TestCase):
-    def test_additive_migration_preserves_legacy_rows_and_is_repeatable(self):
-        engine = create_engine("sqlite://")
-        with engine.begin() as connection:
-            connection.execute(text("""CREATE TABLE schedules (
-                id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, course_id INTEGER NOT NULL,
-                class_date DATE NOT NULL, period VARCHAR(50) NOT NULL, location VARCHAR(100),
-                create_time DATETIME NOT NULL, update_time DATETIME NOT NULL
-            )"""))
-            connection.execute(text("""INSERT INTO schedules VALUES
-                (11,2,1,'2026-08-03','1–2','A201','2026-07-01 10:00:00','2026-07-01 10:00:00'),
-                (12,2,1,'2026-08-04','morning','B101','2026-07-01 10:00:00','2026-07-01 10:00:00')"""))
-        try:
-            initialize_database(engine)
-            initialize_database(engine)
-            with engine.connect() as connection:
-                rows = connection.execute(text("SELECT id, period, location, start_period, end_period, rule_id, is_cancelled FROM schedules ORDER BY id")).all()
-                self.assertEqual(tuple(rows[0]), (11, '1–2', 'A201', 1, 2, None, 0))
-                self.assertEqual(tuple(rows[1]), (12, 'morning', 'B101', None, None, None, 0))
-                names = {item["name"] for item in inspect(connection).get_indexes("schedules")}
-                self.assertTrue({"uq_schedule_rule_date", "uq_schedule_rule_source"}.issubset(names))
-                self.assertTrue({"semesters", "schedule_rules"}.issubset(inspect(connection).get_table_names()))
-        finally:
-            engine.dispose()

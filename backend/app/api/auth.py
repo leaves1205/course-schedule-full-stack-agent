@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
+from pydantic import ValidationError
 from app.common.response import Response
+from app.config import settings
+from app.rate_limit import limiter
 from app.schemas.auth import LoginRequest
 from app.schemas.auth import RegisterRequest
 from sqlalchemy.orm import Session
@@ -12,9 +15,15 @@ from app.common.exceptions import BusinessException
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+# /token and /login check the same credentials, so they share one bucket; otherwise the
+# unused one would be a second, unthrottled way to guess passwords.
+LOGIN_SCOPE = "login"
+
 
 @router.post("/token")
+@limiter.shared_limit(settings.LOGIN_RATE_LIMIT, scope=LOGIN_SCOPE)
 def token(
+    request: Request,
     form: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
 ):
@@ -27,16 +36,18 @@ def token(
         result = auth_service.login(
             db, LoginRequest(username=form.username, password=form.password)
         )
-    except BusinessException as exc:
+    except (BusinessException, ValidationError) as exc:
+        message = exc.message if isinstance(exc, BusinessException) else "Invalid request."
         return JSONResponse(
             status_code=400,
-            content={"error": "invalid_grant", "error_description": exc.message},
+            content={"error": "invalid_grant", "error_description": message},
         )
     return {"access_token": result.token, "token_type": "bearer"}
 
 
 @router.post("/login")
-def login(data: LoginRequest, db: Session = Depends(get_db)):
+@limiter.shared_limit(settings.LOGIN_RATE_LIMIT, scope=LOGIN_SCOPE)
+def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
     """Sign in"""
     result = auth_service.login(db, data)
     # Return response data.
@@ -47,7 +58,8 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/register")
-def register(data: RegisterRequest, db: Session = Depends(get_db)):
+@limiter.limit(settings.REGISTER_RATE_LIMIT)
+def register(request: Request, data: RegisterRequest, db: Session = Depends(get_db)):
     """Register"""
     auth_service.register(db, data)
     # Return response data.

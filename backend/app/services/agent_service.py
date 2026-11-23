@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 import logging
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.tools import BaseTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import ChatOpenAI
@@ -52,7 +52,7 @@ def _build_system_prompt(reference_date: date | None = None) -> str:
 def _build_model() -> ChatOpenAI:
     """Create the model client from configuration without sending a chat request."""
     if not settings.LLM_API_KEY:
-        raise BusinessException("LLM_API_KEY is not configured. Set it in backend/.env.")
+        raise BusinessException("LLM_API_KEY is not configured. Set it in backend/.env.", code=500)
 
     return ChatOpenAI(
         base_url=settings.LLM_BASE_URL,
@@ -113,11 +113,11 @@ def _read_result(messages: list[BaseMessage]) -> dict:
     last_message = messages[-1] if messages else None
     # Accept only the final assistant message without tool calls to avoid returning an intermediate message.
     if not isinstance(last_message, AIMessage) or last_message.tool_calls:
-        raise BusinessException(message="The assistant did not generate a final answer. Please ask again.")
+        raise BusinessException(message="The assistant did not generate a final answer. Please ask again.", code=502)
     # text supports strings and text blocks; trim surrounding whitespace before checking.
     answer = last_message.text.strip()
     if not answer:
-        raise BusinessException(message="The assistant did not generate a final answer. Please ask again.")
+        raise BusinessException(message="The assistant did not generate a final answer. Please ask again.", code=502)
     # A tool may run more than once; deduplicate names in first-use order and return only the names.
     tools_used = list(
         dict.fromkeys(
@@ -137,7 +137,8 @@ async def ask(question: str, history: list[ChatMessage], authorization: str) -> 
     tools = await _load_mcp_tools(authorization)
     if not tools:
         raise BusinessException(
-            message="MCP returned no available tools. Check the MCP service and backend logs."
+            message="MCP returned no available tools. Check the MCP service and backend logs.",
+            code=503,
         )
     agent = create_agent(
         model,
@@ -153,18 +154,21 @@ async def ask(question: str, history: list[ChatMessage], authorization: str) -> 
             },
             config={"recursion_limit": settings.AGENT_RECURSION_LIMIT},
         )
-        logger.info("Model output: %s", result)
+        # Log sizes only: the messages contain the user's schedule and conversation.
+        logger.info("Agent finished with %d messages.", len(result["messages"]))
     except GraphRecursionError as exc:
         logger.exception("Agent reached the graph step limit.")
         raise BusinessException(
-            message="Too many processing steps. Narrow the question and try again."
+            message="Too many processing steps. Narrow the question and try again.",
+            code=422,
         ) from exc
     except BusinessException:
         raise
     except Exception as exc:
         logger.exception("Model invocation failed.")
         raise BusinessException(
-            message="Model invocation failed. Check the model service and backend logs."
+            message="Model invocation failed. Check the model service and backend logs.",
+            code=502,
         ) from exc
     new_messages = result["messages"][len(input_messages) :]
     return _read_result(new_messages)
@@ -185,7 +189,7 @@ async def stream_ask(question: str, history: list[ChatMessage], authorization: s
         tools = await _load_mcp_tools(authorization)
         # Stop when no tools are available so the model cannot pretend a schedule query succeeded.
         if not tools:
-            raise BusinessException(message="MCP returned no available tools. Check the MCP service.")
+            raise BusinessException(message="MCP returned no available tools. Check the MCP service.", code=503)
 
         agent = create_agent(
             model,

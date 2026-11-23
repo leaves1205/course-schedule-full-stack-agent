@@ -7,7 +7,6 @@ from app.database import get_db
 from sqlalchemy.orm import Session
 from app.services import schedule_service as schedule_service
 from app.schemas.schedule import (
-    ScheduleResponse,
     ScheduleCreateRequest,
     ScheduleUpdateRequest,
 )
