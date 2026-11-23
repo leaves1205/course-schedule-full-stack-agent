@@ -2,7 +2,8 @@
 
 -- Create a MySQL database first, then import this file into that database.
 
--- Existing installations are upgraded by backend/migrate_schedule.py or FastAPI startup.
+-- Reference snapshot of the schema. The source of truth is the Alembic migrations in backend/migrations/;
+-- to create or upgrade a database, run `alembic upgrade head` from backend/ instead of importing this file.
 
 SET NAMES utf8mb4;
 
